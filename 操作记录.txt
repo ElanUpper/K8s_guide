@@ -1,0 +1,92 @@
+
+-- 获取当前node
+kubectl get nodes
+-- 获取当前pods
+kubectl get pods
+-- 测试创建一个deployment(kubernetes-bootcamp)
+kubectl run kubernetes-bootcamp --image=jocatalin/kubernetes-bootcamp:v1 --port=8080
+-- 获取当前deployment情况
+kubectl get deployment
+-- 获取当前node情况
+kubectl get nodes -o wide
+-- 删除deployment(kubernetes-bootcamp )
+kubectl delete deployment kubernetes-bootcamp 
+-- 查询deployment(kubernetes-bootcamp)描述
+kubectl describe deploy kubernetes-bootcamp
+-- 查询pods
+root@i-master:/elan/kubernetes-starter/target/master-node# kubectl get pods
+NAME                                   READY     STATUS    RESTARTS   AGE
+kubernetes-bootcamp-6b7849c495-bqrqm   1/1       Running   0          4m
+kubectl describe pods kubernetes-bootcamp-6b7849c495-bqrqm
+
+
+-- 通过restful api方式
+kubectl proxy
+curl http://localhost:8001/api/v1/proxy/namespaces/default/pods/kubernetes-bootcamp-6b7849c495-bqrqm
+
+-- 通过scale进行增容减容
+kubectl scale deploy kubernetes-bootcamp --replicas 4 -->
+   kubectl scale deploy kubernetes-bootcamp --replicas 2 
+
+-- 更新镜像
+kubectl set image deploy kubernetes-bootcamp kubernetes-bootcamp=jocatalin/kubernetes-bootcamp:v2
+-- 查看更新结果
+kubectl rollout status deploy kubernetes-bootcamp
+-- 回退deploy
+kubectl rollout status deploy kubernetes-bootcamp
+
+
+-- 通过yaml方式创建pod/deployment
+kubectl create -f *.yaml
+  -- 创建pods yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+          - containerPort: 80
+              
+  -- 创建deployment yaml
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    metadata:
+      name: nginx-deploy
+    spec:
+      replicas: 2
+      template:
+        metadata:
+          labels: 
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.7.9
+            ports:
+              - containerPort: 80
+
+-- 查看pods app=nginx
+root@i-master:~/service# kubectl get pods -l app=nginx
+NAME                            READY     STATUS    RESTARTS   AGE
+nginx-deploy-6c54bd5869-7stjt   1/1       Running   0          1m
+nginx-deploy-6c54bd5869-gfkvh   1/1       Running   0          1m
+
+
+-- 查看服务
+root@i-master:~/service# kubectl get service
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.68.0.1    <none>        443/TCP   13h
+-- 描述服务
+root@i-master:~/service# kubectl describe service kubernetes
+
+-- 在各个worker安装kube proxy
+  .....
+-- 命令:将deploy(nginx-deploy)暴露为service
+kubectl expose deploy nginx-deploy --type="NodePort" --target-port=80 --port=8080
+-- 文件:
+
+
+kubectl -n kube-system get services
