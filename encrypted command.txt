@@ -1,0 +1,2 @@
+tar -czvf - kubernetes-starter | openssl des3 -salt -k Elan -out k8s.tar.gz
+openssl des3 -d -k Elan -salt -in k8s.tar.gz | tar xzf -
