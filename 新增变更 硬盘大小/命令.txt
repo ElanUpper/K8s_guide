@@ -1,0 +1,64 @@
+
+------------------------- 新增磁盘  -----------------------
+
+# 列出所有partition table
+fdisk -l
+
+# 新增新建磁盘一个主分区表
+fdisk /dev/vdb
+
+Command (m for help): n
+Partition type:
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended
+Select (default p): p
+Partition number (1-4, default 1): 1
+First sector (2048-41943039, default 2048): 
+
+# 格式化磁盘
+mkfs.ext3 /dev/vdb1
+
+# 文件夹挂载到新增磁盘
+mkdir /backup
+mount /dev/vdb1 /backup
+# 查看文件系统（-h --human-readable）
+df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        20G  3.2G   16G  18% /
+devtmpfs        487M     0  487M   0% /dev
+tmpfs           497M     0  497M   0% /dev/shm
+tmpfs           497M  372K  496M   1% /run
+tmpfs           497M     0  497M   0% /sys/fs/cgroup
+tmpfs           100M     0  100M   0% /run/user/0
+/dev/vdb1        20G   45M   19G   1% /backup
+
+
+------------------------- 磁盘扩容  -----------------------
+
+# 卸载磁盘
+unmount /dev/vdb1
+
+# 查看文件系统（-h --human-readable）
+df -h
+
+# 进入cloud provider修改磁盘大小
+...
+
+# 重新创建分区
+fdisk /dev/vdb1
+
+Command (m for help): p  # 查看信息
+Disk /dev/vdb1: 21.5 GB, 21473787904 bytes, 41940992 sectors
+
+Command (m for help): d # 删除分区
+
+Command (m for help): n  # 新建分区
+...
+
+# 检查文件系统
+e2fsck -f /dev/vdb1
+# 变更文件大小
+resize2fs - f /dev/vdb1
+
+# 重新挂载文件夹挂载到新增磁盘
+mount /dev/vdb1 /backup
